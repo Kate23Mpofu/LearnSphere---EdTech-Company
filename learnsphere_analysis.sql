@@ -34,7 +34,7 @@ FROM
     courses;
 
 -- analysis
--- How has student signups and enrollment volume trended over the last 3 years?
+--  How has student signups and enrollment volume trended over the last 3 years?
 SELECT 
     year,
     SUM(signup_count) AS signups,
@@ -68,8 +68,7 @@ FROM
 GROUP BY year
 ORDER BY year;
 
-
---  Which course categories generate the most revenue, and which have the highest dropout rate?
+-- Which course categories generate the most revenue, and which have the highest dropout rate?
 -- highest revenue
 SELECT 
     c.category,
@@ -79,10 +78,9 @@ FROM
         LEFT JOIN
     enrollments e ON c.course_id = e.course_id
 GROUP BY c.category
-ORDER BY total_revenue DESC
+-- ORDER BY total_revenue DESC
 LIMIT 3;
 
--- highest dropout rate
 SELECT 
     c.category,
     ROUND(AVG(e.status = 'Dropped') * 100, 2) AS dropout_rate
@@ -92,8 +90,28 @@ FROM
     enrollments e ON c.course_id = e.course_id
 GROUP BY c.category
 ORDER BY dropout_rate DESC
-LIMIT 1;
---  What is the course completion rate overall, and which courses/instructors underperform?
+LIMIT 3;
+
+
+-- What is the course completion rate overall, and which courses/instructors underperform?
+-- overall course completion rate
+SELECT 
+    ROUND(AVG(status = 'Completed') * 100, 2) AS overall_course_completion_rate
+FROM
+    enrollments;
+
+-- underperforming courses
+SELECT 
+    c.course_title,
+    ROUND(AVG(e.status = 'Completed') * 100, 2) AS completion_rate
+FROM
+    courses c
+        JOIN
+    enrollments e ON c.course_id = e.course_id
+GROUP BY c.course_title
+HAVING completion_rate <= 30
+ORDER BY completion_rate DESC;
+
 --  Which signup source and device type bring in the most paying, completing students?
 SELECT 
     s.device_type,
@@ -109,6 +127,7 @@ WHERE
 GROUP BY s.device_type , s.signup_source
 ORDER BY paying_completed_students DESC
 LIMIT 1;
+
 --  Which cities/provinces should LearnSphere target for marketing spend, based on enrollment and revenue?
 -- What is the average student rating per course/instructor, and does it correlate with completion rate?
 -- What % of enrollments used a discount (amount paid below course price), and how does that affect completion?
